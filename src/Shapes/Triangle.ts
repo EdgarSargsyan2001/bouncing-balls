@@ -1,8 +1,8 @@
 import { Circle } from './Circle';
-import { iShape } from './Shape';
+import { IShape } from '../Interfaces/IShape';
 import { helper } from '../helpers/helper';
 
-export class Triangle implements iShape {
+export class Triangle implements IShape {
   public x: number;
   public y: number;
   public mass: number;
@@ -38,7 +38,7 @@ export class Triangle implements iShape {
     ctx.lineTo(this.x, this.y + this.aSide);
     ctx.lineTo(this.x + this.bSide, this.y + this.aSide);
     ctx.lineTo(this.x, this.y);
-    // ctx.stroke();
+    ctx.stroke();
     ctx.save();
     // ctx.clip();
     ctx.drawImage(
@@ -48,11 +48,11 @@ export class Triangle implements iShape {
       this.aSide + 40,
       this.bSide + 40,
     );
-    ctx.restore();
 
+    ctx.restore();
     ctx.closePath();
   }
-  public isCollisoin(c: Circle): boolean {
+  public isCollision(c: Circle): boolean {
     this.hitPoint = helper.pointOnTriangle(
       c.x,
       c.y,

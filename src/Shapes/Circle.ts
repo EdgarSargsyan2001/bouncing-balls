@@ -1,7 +1,8 @@
-import { iShape, iMovably } from './Shape';
+import { IShapeAndMove } from '../Interfaces/IShapeAndMove';
 import { helper } from '../helpers/helper';
+import { influencingForces } from '../../src/index';
 
-export class Circle implements iShape, iMovably {
+export class Circle implements IShapeAndMove {
   public x: number;
   public y: number;
   public radius: number;
@@ -21,7 +22,7 @@ export class Circle implements iShape, iMovably {
     this.image.src = imgPath;
   }
 
-  public isCollisoin(c: Circle): boolean {
+  public isCollision(c: Circle): boolean {
     if (c != this) {
       let d = helper.getDistanse(this.x, this.y, c.x, c.y);
       if (d - (this.radius + c.radius) < 0) {
@@ -30,23 +31,34 @@ export class Circle implements iShape, iMovably {
     }
     return false;
   }
+  public isOutOfTheWindow(leftSize: number, rightSize: number): boolean {
+    if (this.x + this.radius < leftSize || this.x - this.radius > rightSize) {
+      return true;
+    }
+    return false;
+  }
 
   public resolveCollision(c: Circle): void {
     let xDist = c.x - this.x;
     let yDist = c.y - this.y;
+    const yVelocityDiff = this.velocity.Y - c.velocity.Y;
+    const xVelocityDiff = this.velocity.X - c.velocity.X;
 
-    if (this.velocity.Y == 0) {
-      const balans = 15;
+    if (-10 < this.velocity.X && this.velocity.X < 10 && this.velocity.Y != 0) {
+      let balans = Math.abs(yVelocityDiff / 10);
+      if (this.mass < c.mass) {
+        balans += 30;
+      } else {
+        balans += 50;
+      }
       if (xDist < 0) {
         c.velocity.X += -balans;
-        this.velocity.X += balans * 2;
+        this.velocity.X += balans;
       } else {
         c.velocity.X += balans;
-        this.velocity.X += -balans * 2;
+        this.velocity.X += -balans;
       }
     }
-    const xVelocityDiff = this.velocity.X - c.velocity.X;
-    const yVelocityDiff = this.velocity.Y - c.velocity.Y;
 
     if (xVelocityDiff * xDist + yVelocityDiff * yDist >= 0) {
       const angle = -Math.atan2(yDist, xDist);
@@ -79,7 +91,6 @@ export class Circle implements iShape, iMovably {
   public draw(ctx: CanvasRenderingContext2D): void {
     ctx.beginPath();
     ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
-    // ctx.fill();
     ctx.save();
     ctx.clip();
     ctx.drawImage(
@@ -91,45 +102,41 @@ export class Circle implements iShape, iMovably {
     );
     ctx.restore();
     ctx.closePath();
-    // console.log(this.velocity);
   }
 
   public move(
-    gravity: number,
-    damping: number,
     deltaTime: number,
     canvasHeight: number,
-    airResistance: number,
-    contactForce: number,
+    forces: influencingForces,
   ) {
     if (this.velocity.Y == 0) {
       if (this.velocity.X !== 0) {
         if (this.velocity.X < 0) {
-          this.velocity.X += contactForce;
+          this.velocity.X += forces.contactForce;
           if (this.velocity.X > 0) {
             this.velocity.X = 0;
           }
         }
         if (this.velocity.X > 0) {
-          this.velocity.X -= contactForce;
+          this.velocity.X -= forces.contactForce;
           if (this.velocity.X < 0) {
             this.velocity.X = 0;
           }
         }
       }
     }
-    this.velocity.Y += gravity - airResistance / 2;
+    this.velocity.Y += forces.gravity - forces.airResistance / 2;
 
     // air Resistance in abscissa axis
     if (this.velocity.X !== 0) {
       if (this.velocity.X < 0) {
-        this.velocity.X += airResistance;
+        this.velocity.X += forces.airResistance;
         if (this.velocity.X > 0) {
           this.velocity.X = 0;
         }
       }
       if (this.velocity.X > 0) {
-        this.velocity.X -= airResistance;
+        this.velocity.X -= forces.airResistance;
         if (this.velocity.X < 0) {
           this.velocity.X = 0;
         }
@@ -143,8 +150,8 @@ export class Circle implements iShape, iMovably {
     if (this.y + this.radius > canvasHeight) {
       this.y = canvasHeight - this.radius;
 
-      if (this.velocity.Y * damping > gravity) {
-        this.velocity.Y *= -damping / (this.mass / 10);
+      if (this.velocity.Y * forces.damping > forces.gravity) {
+        this.velocity.Y *= -forces.damping / (this.mass / 10);
       } else {
         this.velocity.Y = 0;
       }
