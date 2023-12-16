@@ -38,7 +38,7 @@ export class Triangle implements IShape {
     ctx.lineTo(this.x, this.y + this.aSide);
     ctx.lineTo(this.x + this.bSide, this.y + this.aSide);
     ctx.lineTo(this.x, this.y);
-    ctx.stroke();
+    // ctx.stroke();
     ctx.save();
     // ctx.clip();
     ctx.drawImage(

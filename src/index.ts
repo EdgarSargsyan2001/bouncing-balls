@@ -26,8 +26,6 @@ export class BouncingCircles {
       new Triangle(5, this.lendX - siez + 10, siez, siez, trampolineImage),
     );
 
-    this.fixedShapes.push(new Triangle(250, 250, 100, 100, trampolineImage));
-
     //events
     this.canvas.addEventListener('mousemove', (event: MouseEvent) => {
       const rect = this.canvas.getBoundingClientRect();
@@ -46,13 +44,12 @@ export class BouncingCircles {
     this.canvas.addEventListener('wheel', (event: WheelEvent) => {
       event.deltaY > 0 ? this.changeRadius(-10) : this.changeRadius(10);
       this.myCircleHover.radius = this.radius;
-      this.myCircleHover.image.src = `assets/boll${this.radius / 10 - 2}.jpg`;
     });
 
     this.canvas.addEventListener('mousedown', (event: MouseEvent) => {
       if (event.button === 1) {
         for (let i: number = 0; i < this.moveShapes.length; ++i) {
-          this.moveShapes[i].velocity.Y = -5000;
+          this.moveShapes[i].velocity.Y = -1000;
         }
       }
     });
@@ -165,7 +162,7 @@ export class BouncingCircles {
   private fixedShapes: Array<IShape> = new Array<IShape>();
   private moveShapes: Array<IShapeAndMove> = new Array<IShapeAndMove>();
   private radius: number = 30;
-  private circleCount = 15;
+  private circleCount: number = 15;
   private lendX: number;
 
   private Forces: influencingForces = {
